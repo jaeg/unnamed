@@ -1,13 +1,13 @@
 package system
 
 import (
-	"bufio"
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
 	"unnamed/component"
 	"unnamed/world"
+
+	termbox "github.com/nsf/termbox-go"
 )
 
 // PlayerSystem .
@@ -80,7 +80,7 @@ func PlayerSystem(planets map[string]*world.Planet) map[string]*world.Planet {
 								case "D":
 									x += 1
 								}
-								fmt.Println("GetAt", x, y)
+
 								interactEntity := level.GetEntityAt(x, y)
 								if interactEntity != nil {
 									if interactEntity.HasComponent("ShopComponent") {
@@ -164,9 +164,20 @@ func checkStairs(x int, y int, tile world.TileSmall) {
 }
 
 func getInput() string {
-	fmt.Print("Input:")
-	reader := bufio.NewReader(os.Stdin)
-	input, _ := reader.ReadString('\n')
+	key := ""
+	for key == "" {
+		switch ev := termbox.PollEvent(); ev.Type {
+		case termbox.EventKey:
+			switch ev.Key {
+			case termbox.KeyEsc:
+				termbox.Close()
+				os.Exit(1)
+				break
+			default:
+				key = string(ev.Ch)
+			}
+		}
+	}
 
-	return strings.ToUpper(strings.Trim(input, " \n"))
+	return strings.ToUpper(key)
 }

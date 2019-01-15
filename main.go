@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"math/rand"
 	"os/exec"
 	"time"
@@ -10,16 +9,26 @@ import (
 	"unnamed/entity"
 	"unnamed/system"
 	"unnamed/world"
+
+	"github.com/nsf/termbox-go"
 )
 
 var planets map[string]*world.Planet
 
 func main() {
-	start := time.Now()
+	err := termbox.Init()
+	if err != nil {
+		panic(err)
+	}
+	defer termbox.Close()
+
+	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
+
+	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	//start := time.Now()
 	planets = make(map[string]*world.Planet)
 	planets["hub"] = world.NewPlanet()
-	elapsed := time.Since(start)
-	log.Printf("Generating the world took %s", elapsed)
+	//elapsed := time.Since(start)
 
 	//Player
 	newPlayerEntity := entity.Entity{}
@@ -69,9 +78,15 @@ func main() {
 	// restore the echoing state when exiting
 	defer exec.Command("stty", "-F", "/dev/tty", "echo").Run()
 
-	ticker := time.NewTicker(time.Second / 4)
+	ticker := time.NewTicker(time.Second / 16)
 
+	running := true
+	system.RenderSystem(planets)
 	for _ = range ticker.C {
+		if !running {
+			break
+		}
+
 		//start := time.Now()
 		system.InitiativeSystem(planets)
 		planets = system.PlayerSystem(planets)
@@ -79,8 +94,8 @@ func main() {
 		system.RenderSystem(planets)
 		system.StatusConditionSystem(planets)
 		planets = system.CleanUpSystem(planets)
-		elapsed := time.Since(start)
-		log.Printf("Game loop took %s", elapsed)
+		//elapsed := time.Since(start)
+		//log.Printf("Game loop took %s", elapsed)
 	}
 
 }

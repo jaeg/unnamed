@@ -61,7 +61,6 @@ func newLevel(width int, height int) (level *Level) {
 }
 
 func NewOverworldSection(width int, height int) (level *Level) {
-	fmt.Println("Creating new random level")
 	level = newLevel(width, height)
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
